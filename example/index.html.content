@@ -1,0 +1,6 @@
+<p>This is an example!</p>
+
+<h2>Recent articles</h2>
+{{RECENT}}
+<br>
+<a href="articles.html">See all articles</a>
