@@ -21,6 +21,7 @@ Here are some rules for creating a site. Basically you'll want to create one tem
 Articles must be placed in "articles/" directory or otherwise, it's not considered to be an article. Article's filename must be formated as follows: "‰Y-‰m-‰d-title", for example 2021-01-01-This-is-an-article.
 The article's filename upon generating is formatted correctly for the web. If HTML is used as a content file, set the filename ending to ".html.content". 
 
+There is also sitemap generator "sitemap-gen.py" which can generate "sitemap.xml". 
 
 Magic words
 -----------
@@ -33,6 +34,16 @@ Magic words
 Example site
 ------------
 You can visit https://badai.xyz to see a website generated with ssgen in production.
+
+Usage
+-----
+ssgen:
+
+    ./ssgen.py src dest template
+
+Sitemap generator:
+
+    ./sitemap-gen.py baseurl sourcedir output
 
 Bugs
 ----
