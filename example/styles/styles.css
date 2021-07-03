@@ -108,3 +108,42 @@ p {
     font-size: 0.8em;
     color: #515151;
 }
+
+blockquote{
+    font-size: 1em;
+    width:60%;
+    margin:2em auto;
+    font-style:italic;
+    color: #555555;
+    padding:1.2em 1.875em 0.5em 4.6875em;
+    border-left:8px solid #515151 ;
+    line-height:1.6;
+    position: relative;
+    background:#f7f7f7;
+}
+
+blockquote::before{
+    font-family:Arial;
+    content: "\201C";
+    color:#515151;
+    font-size:4em;
+    position: absolute;
+    left: 10px;
+    top:-10px;
+}
+
+blockquote::after{
+    content: '';
+}
+
+blockquote span::before{
+    content: '― ';
+}
+
+blockquote span{
+    display:block;
+    color:#333333;
+    font-style: normal;
+    font-weight: bold;
+    margin-top:1em;
+}

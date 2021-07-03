@@ -87,7 +87,7 @@ def replace_magics(html):
 def replace_after_magics(html):
     html = html.replace("{{TIME}}", datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
     if("{{PUBLISHDATE}}" in html):
-        html = html.replace("{{PUBLISHDATE}}", get_article_info(current_file_index)[3], 1)
+        html = html.replace("{{PUBLISHDATE}}", "<div class=\"publish-date\">"+get_article_info(current_file_index)[3]+"</div>", 1)
 
     return html
 
