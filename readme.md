@@ -21,8 +21,8 @@ Here are some rules for creating a site:
 - Only one template file for the whole site
 - {{CONTENT}} magic word in the template indicates the place for the site's content 
 - Articles must be placed in "articles/" directory or otherwise, it's not considered to be an article
-- Article's filename must be formated as follows: "%Y-%m-%d-title", for example "2021-01-01-This-is-an-article". The date is the published date and text after that the title.
-- The article's filename upon generating is formatted correctly for the web
+- Article's filename must be formated as follows: "%Y-%m-%d-title", for example "2021-01-01-this-is-an-article". The date is the published date.
+- First line of article file must be its title.
 - If HTML is used as a content file, set the filename ending to ".html.content". 
 
 There is also sitemap generator "sitemap-gen.py" which can generate "sitemap.xml". 
@@ -44,6 +44,10 @@ Usage
 ssgen:
 
     ./ssgen.py src dest template
+    
+Force regeneration:
+
+    ./ssgen.py src dest template force
 
 Sitemap generator:
 
