@@ -33,6 +33,7 @@ articles = []
 article_list_html = ""
 recent_articles_html = ""
 current_file_index = 0
+force = False
 
 
 def get_current_dir():
@@ -92,11 +93,11 @@ def replace_after_magics(html):
     return html
 
 
-def format_article_filename(filename, pattern=r"[^a-z0-9\-\.]"):
-    filename = filename.lower()
-    filename = re.sub(pattern, "", filename)
-
-    return filename
+def get_article_title(path):
+    f = open(path)
+    result = f.readline()
+    f.close()
+    return result
 
 def generate_copy_files(files):
     global current_file_index
@@ -118,9 +119,9 @@ def generate_copy_files(files):
 
             temp = form.split('-')
             date = '-'.join(temp[:3])
-            title = ' '.join(temp[3:])
+            title = get_article_title(path)
 
-            articles.append([i, title, format_article_filename(article), date])
+            articles.append([i, title, article, date])
 
         i += 1
 
@@ -180,7 +181,7 @@ def copy_resource(f):
     f_name = f.split('/')[-1:][0]
     target_dir = dest_dir + get_dir_structure(f, src_dir, f_name)
 
-    if not needs_update(f, target_dir + f_name): return
+    if not force and not needs_update(f, target_dir + f_name): return
 
     try:
         os.makedirs(target_dir)
@@ -193,9 +194,8 @@ def content_to_html(path):
     global generated_files
     target_dir, f_name = get_target_name_dir(path)
     f_name_new = f_name[:-8]
-    if "articles/" in path: f_name_new = format_article_filename(f_name_new)
 
-    if not needs_update(path, target_dir + f_name_new) and not needs_update(master_path, target_dir + f_name_new):
+    if not force and not needs_update(path, target_dir + f_name_new) and not needs_update(master_path, target_dir + f_name_new):
         return
 
     f = open(path, 'r')
@@ -209,9 +209,8 @@ def markdown_to_html(path):
     global generated_files
     target_dir, f_name = get_target_name_dir(path)
     f_name_new = f_name[:-2] + "html"
-    if "articles/" in path: f_name_new = format_article_filename(f_name_new)
 
-    if not needs_update(path, target_dir + f_name_new) and not needs_update(master_path, target_dir + f_name_new): return
+    if not force and not needs_update(path, target_dir + f_name_new) and not needs_update(master_path, target_dir + f_name_new): return
 
     res = subprocess.check_output(to_html_command.replace("$input_file$", path, 1), shell=True).decode('utf-8')
     write_html(res, target_dir, f_name_new)
@@ -234,12 +233,13 @@ def dir_format(str):
 
 
 def print_usage():
-    print("usage:", sys.argv[0], "src dest template")
+    print("usage:", sys.argv[0], "src dest template force")
 
     options = """\nOptions:
     src\t\t\tmarkdown source directory
     dest\t\tdestination directory
     template\t\ttemplate html file
+    force\t\tforce to regenerate everything
     """
 
     print(options)
@@ -250,11 +250,16 @@ def main():
     global src_dir
     global dest_dir
     global master_path
+    global force
 
     # Parse arguments
     if len(sys.argv) < 4:
         print_usage()
         sys.exit(1)
+
+    if len(sys.argv) > 4:
+        if sys.argv[4] == "force":
+            force = True
 
     src_dir = dir_format(sys.argv[1])
     dest_dir = dir_format(sys.argv[2])
