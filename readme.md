@@ -1,8 +1,8 @@
 ssgen
 =====
-ssgen is a simple static site generator for blog posting with under 200 lines of code (~290 in total). It's also designed performance in mind, and it's fast or at least fast as you can get with python.
+ssgen is a simple static site generator for blog posting with under 250 lines of code (~340 in total). It's also designed performance in mind, and it's fast or at least fast as you can get with python.
 
-ssgen is only meant for minimal and simple sites, not for any modern fancy 10 MB sites. Only one template is used for the whole website.
+ssgen is only meant for minimal and simple sites. Only one template is used for the whole website.
 
 Supported file formats
 ----------------------
@@ -37,7 +37,7 @@ Magic words
 
 Math
 ----
-Math equations can be generated using mathjax-cli. This is a bloated solution, but it's better than making end-user run javascript.
+Math equation SVGs can be generated using mathjax-cli (doesn't work with RSS feed). This is a bloated and very slow solution, but it's better than making end-user run javascript.
 
 Install mathjax-cli with npm or yarn.
 
@@ -46,6 +46,14 @@ Install mathjax-cli with npm or yarn.
 Then give executable location to ssgen with -mj parameter:
 
     $ ./ssgen.py source output master.html -mj node/node_modules/mathjax-node-cli/bin/tex2svg
+
+RSS feed
+--------
+RSS feed can be generated separately with the following example command:
+
+    ./ssgen.py source output master.html -rss https://base-url/ -rsst 'RSS-feed title' -rssd 'RSS-feed description'
+
+Only "-rss" is required, "-rsst" and "-rssd" parameters are optional, but you should use them.
 
 Example site
 ------------

@@ -18,6 +18,7 @@
 import sys
 import os
 from datetime import datetime
+import time
 import subprocess
 import shutil
 import re
@@ -36,7 +37,10 @@ recent_articles_html = ""
 current_file_index = 0
 force = False
 mathjax = False
-
+rss = False
+rsst = None
+rssd = None
+rss_gen = None
 
 def get_current_dir():
     return os.getcwd() + '/'
@@ -97,7 +101,7 @@ def replace_after_magics(html):
 
 def get_article_title(path):
     f = open(path)
-    result = f.readline()
+    result = f.readline().strip()
     f.close()
     return result
 
@@ -163,13 +167,24 @@ def get_files(path):
     return subfolders, files
 
 
-def generate_math(html, f_name_new):
+def generate_math(html):
     results = re.findall(r'(<span\s?class="?math.*?"?.*?>\\\[(.*?)\\\]<\/span>)', html, flags=re.IGNORECASE|re.MULTILINE|re.DOTALL)
     for i, result in enumerate(results):
         res = subprocess.check_output(mathjax+" '"+result[1].replace('\n', ' ')+"'", shell=True).decode('utf-8')
         html = html.replace(result[0], "<div class=\"math\">"+res+"</div>", 1)
 
     return html
+
+def add_to_rss(html):
+    html = replace_after_magics(html)
+    article_info = get_article_info(current_file_index)
+    if not article_info: return
+    entry = rss_gen.add_entry()
+    entry.id(rss+'articles/'+article_info[2])
+    entry.link(href=rss+'articles/'+article_info[2])
+    entry.title(article_info[1])
+    entry.description(html)
+    entry.pubDate(article_info[3]+" 00:00:00"+time.strftime("%z", time.localtime()))
 
 def write_html(html, target_dir, f_name_new):
     html = replace_magics(html)
@@ -178,7 +193,11 @@ def write_html(html, target_dir, f_name_new):
         os.makedirs(target_dir)
     except FileExistsError: pass
     if mathjax:
-        html = generate_math(html, f_name_new)
+        html = generate_math(html)
+
+    if rss:
+        add_to_rss(html)
+        if not force: return True
 
     final_html = master.replace("{{CONTENT}}", html, 1)
     final_html = replace_after_magics(final_html)
@@ -191,6 +210,8 @@ def write_html(html, target_dir, f_name_new):
 
 def copy_resource(f):
     global copied_resources
+    if rss: return
+
     f_name = f.split('/')[-1:][0]
     target_dir = dest_dir + get_dir_structure(f, src_dir, f_name)
 
@@ -208,7 +229,7 @@ def content_to_html(path):
     target_dir, f_name = get_target_name_dir(path)
     f_name_new = f_name[:-8]
 
-    if not force and not needs_update(path, target_dir + f_name_new) and not needs_update(master_path, target_dir + f_name_new):
+    if not force and not rss and not needs_update(path, target_dir + f_name_new) and not needs_update(master_path, target_dir + f_name_new):
         return
 
     f = open(path, 'r')
@@ -223,12 +244,23 @@ def markdown_to_html(path):
     target_dir, f_name = get_target_name_dir(path)
     f_name_new = f_name[:-2] + "html"
 
-    if not force and not needs_update(path, target_dir + f_name_new) and not needs_update(master_path, target_dir + f_name_new): return
+    if not force and not rss and not needs_update(path, target_dir + f_name_new) and not needs_update(master_path, target_dir + f_name_new): return
 
     res = subprocess.check_output(to_html_command.replace("$input_file$", path, 1), shell=True).decode('utf-8')
     write_html(res, target_dir, f_name_new)
     generated_files += 1
 
+
+def init_rss(dest_dir):
+    global rss_gen
+    global rss
+    from feedgen.feed import FeedGenerator
+    rss = dir_format(rss)
+    rss_gen = FeedGenerator()
+    rss_gen.title(rsst)
+    rss_gen.description(rssd)
+    rss_gen.link(href=rss, rel='alternate')
+    rss_gen.link(href=rss+'rss.xml', rel='self')
 
 def get_target_name_dir(path):
     f_name = path.split('/')[-1:][0]
@@ -251,6 +283,9 @@ def main():
     global master_path
     global force
     global mathjax
+    global rss
+    global rsst
+    global rssd
 
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -260,17 +295,26 @@ def main():
     parser.add_argument('template', help="template html filename")
     parser.add_argument('-f', '--force', help="force to regenerate", action='store_true')
     parser.add_argument('-mj', '--mathjax', default=False, help="mathjax-cli tex2svg location")
+    parser.add_argument('-rss', '--rss-feed', help="title for rss feed (setting this generates the feed)", default=False)
+    parser.add_argument('-rsst', '--rss-title', help="title for generated rss feed", default="RSS-feed")
+    parser.add_argument('-rssd', '--rss-description', help="description for generated rss feed", default="This is RSS-feed")
 
     args = parser.parse_args(sys.argv[1:])
 
     force = args.force
     mathjax = args.mathjax
+    rss = args.rss_feed
 
     src_dir = dir_format(args.source_dir)
     dest_dir = dir_format(args.output_dir)
     master_path = src_dir + args.template
 
     _, files = get_files(src_dir)
+
+    if rss:
+        rsst = args.rss_title
+        rssd = args.rss_description
+        init_rss(dest_dir)
 
     # Load master html
     try:
@@ -283,6 +327,10 @@ def main():
 
     # Generate files and copy resources
     generate_copy_files(files)
+
+    if rss:
+        rss_gen.rss_file(dest_dir+"rss.xml")
+        print("rss feed generated")
 
     print("generated", generated_files, "html file(s)")
     print("copied", copied_resources, "file(s)")

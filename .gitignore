@@ -1,3 +1,5 @@
 update-site.sh
 example-html
 node/
+create-rss.sh
+generate-site.sh
