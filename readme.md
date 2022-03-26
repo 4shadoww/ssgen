@@ -35,6 +35,18 @@ Magic words
 - {{TIME}} – current UTC timestamp
 - {{PUBLISHDATE}} - date from article's filename
 
+Math
+----
+Math equations can be generated using mathjax-cli. This is a bloated solution, but it's better than making end-user run javascript.
+
+Install mathjax-cli with npm or yarn.
+
+    $ npm install https://github.com/mathjax/mathjax-node-cli/ 
+
+Then give executable location to ssgen with -mj parameter:
+
+    $ ./ssgen.py source output master.html -mj node/node_modules/mathjax-node-cli/bin/tex2svg
+
 Example site
 ------------
 You can visit https://badai.xyz to see a website generated with ssgen in production.

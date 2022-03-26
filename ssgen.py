@@ -21,6 +21,7 @@ from datetime import datetime
 import subprocess
 import shutil
 import re
+import argparse
 
 to_html_command = "pandoc --mathjax -f markdown -t html \"$input_file$\""
 master = ""
@@ -34,6 +35,7 @@ article_list_html = ""
 recent_articles_html = ""
 current_file_index = 0
 force = False
+mathjax = False
 
 
 def get_current_dir():
@@ -161,12 +163,23 @@ def get_files(path):
     return subfolders, files
 
 
+def generate_math(html, f_name_new):
+    results = re.findall(r'(<span\s?class="?math.*?"?.*?>\\\[(.*?)\\\]<\/span>)', html, flags=re.IGNORECASE|re.MULTILINE|re.DOTALL)
+    for i, result in enumerate(results):
+        res = subprocess.check_output(mathjax+" '"+result[1].replace('\n', ' ')+"'", shell=True).decode('utf-8')
+        html = html.replace(result[0], "<div class=\"math\">"+res+"</div>", 1)
+
+    return html
+
 def write_html(html, target_dir, f_name_new):
     html = replace_magics(html)
     target_dir = dir_format(target_dir)
     try:
         os.makedirs(target_dir)
     except FileExistsError: pass
+    if mathjax:
+        html = generate_math(html, f_name_new)
+
     final_html = master.replace("{{CONTENT}}", html, 1)
     final_html = replace_after_magics(final_html)
     f = open(target_dir + f_name_new, 'w')
@@ -231,39 +244,31 @@ def dir_format(str):
     if str.endswith('/'): return str
     return str + '/'
 
-
-def print_usage():
-    print("usage:", sys.argv[0], "src dest template force")
-
-    options = """\nOptions:
-    src\t\t\tmarkdown source directory
-    dest\t\tdestination directory
-    template\t\ttemplate html file
-    force\t\tforce to regenerate everything
-    """
-
-    print(options)
-
-
 def main():
     global master
     global src_dir
     global dest_dir
     global master_path
     global force
+    global mathjax
 
-    # Parse arguments
-    if len(sys.argv) < 4:
-        print_usage()
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('source_dir', help="source directory")
+    parser.add_argument('output_dir', help="output directory")
+    parser.add_argument('template', help="template html filename")
+    parser.add_argument('-f', '--force', help="force to regenerate", action='store_true')
+    parser.add_argument('-mj', '--mathjax', default=False, help="mathjax-cli tex2svg location")
 
-    if len(sys.argv) > 4:
-        if sys.argv[4] == "force":
-            force = True
+    args = parser.parse_args(sys.argv[1:])
 
-    src_dir = dir_format(sys.argv[1])
-    dest_dir = dir_format(sys.argv[2])
-    master_path = src_dir + sys.argv[3]
+    force = args.force
+    mathjax = args.mathjax
+
+    src_dir = dir_format(args.source_dir)
+    dest_dir = dir_format(args.output_dir)
+    master_path = src_dir + args.template
 
     _, files = get_files(src_dir)
 
