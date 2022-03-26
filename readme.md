@@ -51,7 +51,7 @@ RSS feed
 --------
 RSS feed can be generated separately with the following example command:
 
-    ./ssgen.py source output master.html -rss https://base-url/ -rsst 'RSS-feed title' -rssd 'RSS-feed description'
+    ./ssgen.py source output master.html -rss https://base-url/ -rsst 'RSS feed title' -rssd 'RSS feed description'
 
 Only "-rss" is required, "-rsst" and "-rssd" parameters are optional, but you should use them.
 

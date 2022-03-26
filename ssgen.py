@@ -296,8 +296,8 @@ def main():
     parser.add_argument('-f', '--force', help="force to regenerate", action='store_true')
     parser.add_argument('-mj', '--mathjax', default=False, help="mathjax-cli tex2svg location")
     parser.add_argument('-rss', '--rss-feed', help="title for rss feed (setting this generates the feed)", default=False)
-    parser.add_argument('-rsst', '--rss-title', help="title for generated rss feed", default="RSS-feed")
-    parser.add_argument('-rssd', '--rss-description', help="description for generated rss feed", default="This is RSS-feed")
+    parser.add_argument('-rsst', '--rss-title', help="title for generated rss feed", default="RSS feed")
+    parser.add_argument('-rssd', '--rss-description', help="description for generated rss feed", default="This is RSS feed")
 
     args = parser.parse_args(sys.argv[1:])
 
