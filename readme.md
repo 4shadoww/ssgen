@@ -11,7 +11,9 @@ Html and markdown are supported.
 Dependencies
 ------------
 - Python 3
-- Pandoc for markdown (optional)
+- Pandoc, for markdown support (optional)
+- python-feedgen, for rss feed support (optional)
+- mathjax-node-cli, for math equations rendering (optional)
 
 Writing first site
 ------------------
@@ -54,6 +56,7 @@ RSS feed can be generated separately with the following example command:
     ./ssgen.py source output master.html -rss https://base-url/ -rsst 'RSS feed title' -rssd 'RSS feed description'
 
 Only "-rss" is required, "-rsst" and "-rssd" parameters are optional, but you should use them.
+This functionality depends on python-feedgen.
 
 Example site
 ------------
