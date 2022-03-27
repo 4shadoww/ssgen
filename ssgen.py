@@ -101,7 +101,17 @@ def replace_after_magics(html):
 
 def get_article_title(path):
     f = open(path)
-    result = f.readline().strip()
+    if path.endswith(".html.content"):
+        html = f.read()
+        reresult = re.match(r"<h1.*?>(.*?)<\/h1>", html, flags=re.IGNORECASE|re.MULTILINE|re.DOTALL)
+        if not reresult:
+            print("could not find article title from", path)
+            sys.exit(1)
+        result = reresult.group(1)
+
+    else:
+        result = f.readline().strip()
+        
     f.close()
     return result
 
@@ -117,7 +127,7 @@ def generate_copy_files(files):
                 form = article[:-3]
                 article = form + ".html"
             elif article.endswith('.content'):
-                form = article[:-12]
+                form = article[:-13]
                 article = form + ".html"
             elif article.endswith(".wipwip"):
                 i += 1
@@ -168,10 +178,25 @@ def get_files(path):
 
 
 def generate_math(html):
+    article_name = get_article_info(current_file_index)
+    if not article_name: return html
+    article_name = article_name[1].replace(' ', '-')
+
     results = re.findall(r'(<span\s?class="?math.*?"?.*?>\\\[(.*?)\\\]<\/span>)', html, flags=re.IGNORECASE|re.MULTILINE|re.DOTALL)
+    if results:
+        try:
+            os.makedirs(dest_dir+"img/math/")
+        except FileExistsError: pass
+
     for i, result in enumerate(results):
-        res = subprocess.check_output(mathjax+" '"+result[1].replace('\n', ' ')+"'", shell=True).decode('utf-8')
-        html = html.replace(result[0], "<div class=\"math\">"+res+"</div>", 1)
+        file_name = "img/math/"+str(i)+"-"+article_name+".svg"
+        if not rss:
+            res = subprocess.check_output(mathjax+" '"+result[1].replace('\n', ' ')+"'", shell=True).decode('utf-8')
+            f = open(dest_dir+file_name, 'w')
+            f.write(res)
+            f.close()
+
+        html = html.replace(result[0], "<div class=\"math\"><img src=\"/"+file_name+"\"></div>", 1)
 
     return html
 
