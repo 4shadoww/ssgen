@@ -24,7 +24,7 @@ Here are some rules for creating a site:
 - {{CONTENT}} magic word in the template indicates the place for the site's content 
 - Articles must be placed in "articles/" directory or otherwise, it's not considered to be an article
 - Article's filename must be formated as follows: "%Y-%m-%d-title", for example "2021-01-01-this-is-an-article". The date is the published date.
-- First line of article file must be its title.
+- First line of article file must be its title. If html is used it must be placed inside h1 tags.
 - If HTML is used as a content file, set the filename ending to ".html.content". 
 
 There is also sitemap generator "sitemap-gen.py" which can generate "sitemap.xml". 
