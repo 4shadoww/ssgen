@@ -36,6 +36,7 @@ article_list_html = ""
 recent_articles_html = ""
 current_file_index = 0
 force = False
+soft_force = False
 mathjax = False
 rss = False
 rsst = None
@@ -190,7 +191,7 @@ def generate_math(html):
 
     for i, result in enumerate(results):
         file_name = "img/math/"+str(i)+"-"+article_name+".svg"
-        if not rss:
+        if not rss and not soft_force:
             res = subprocess.check_output(mathjax+" '"+result[1].replace('\n', ' ')+"'", shell=True).decode('utf-8')
             f = open(dest_dir+file_name, 'w')
             f.write(res)
@@ -307,6 +308,7 @@ def main():
     global dest_dir
     global master_path
     global force
+    global soft_force
     global mathjax
     global rss
     global rsst
@@ -319,6 +321,7 @@ def main():
     parser.add_argument('output_dir', help="output directory")
     parser.add_argument('template', help="template html filename")
     parser.add_argument('-f', '--force', help="force to regenerate", action='store_true')
+    parser.add_argument('-sf', '--soft-force', help="don't regenerate svg math", action='store_true')
     parser.add_argument('-mj', '--mathjax', default=False, help="mathjax-cli tex2svg location")
     parser.add_argument('-rss', '--rss-feed', help="title for rss feed (setting this generates the feed)", default=False)
     parser.add_argument('-rsst', '--rss-title', help="title for generated rss feed", default="RSS feed")
@@ -327,6 +330,7 @@ def main():
     args = parser.parse_args(sys.argv[1:])
 
     force = args.force
+    soft_force = args.soft_force
     mathjax = args.mathjax
     rss = args.rss_feed
 
