@@ -93,7 +93,7 @@ def main():
 
     tree = ET.ElementTree(urlset)
 
-    tree.write(output)
+    tree.write(output, encoding='UTF-8', xml_declaration=True)
 
 
 if __name__ == "__main__":
